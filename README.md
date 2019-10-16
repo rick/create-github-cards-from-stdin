@@ -17,7 +17,12 @@ token: 1234567890feedfacedeadbeefcafe0987654321
 
 ```
 $ bundle install --path vendor/bundler
-$ bundle exec script/create-cards.rb <project-id> <column-id>
+$ bundle exec script/create-cards.rb ...
+
+Usage:
+  script/create-cards.rb <organization_name>                           # displays list of organization projects
+  script/create-cards.rb <organization_name> <project_id>              # displays list of columns in an organization project
+  script/create-cards.rb <organization_name> <project_id> <column_id>  # imports subject data as cards into an organization project column
 ```
 
 You can also set the environment variable `$DEBUG` if you want more verbose output during the fetch process.
