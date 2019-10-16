@@ -25,4 +25,24 @@ Usage:
   script/create-cards.rb <organization_name> <project_id> <column_id>  # imports subject data as cards into an organization project column
 ```
 
+Example session:
+
+```
+$ bundle exec script/create-cards.rb orgname
+name:       product development
+body:       Tracking for work items for our product
+url:        https://api.github.com/projects/123456
+project_id: 123456
+
+$ bundle exec script/create-cards.rb orgname 123456
+name:      Un-triaged
+url:       https://api.github.com/projects/columns/654321
+column_id: 654321
+
+$ cat card-notes.txt| bundle exec script/create-cards.rb orgname 123456 654321
+Created card [https://api.github.com/projects/columns/cards/11111], note: "The first card name!"
+Created card [https://api.github.com/projects/columns/cards/22222], note: "The second card name!"
+...
+```
+
 You can also set the environment variable `$DEBUG` if you want more verbose output during the fetch process.
