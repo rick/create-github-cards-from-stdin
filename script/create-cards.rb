@@ -7,7 +7,6 @@ require "pp"
 # should debugging output be enabled?
 def debugging?
   ENV['DEBUG'] && ENV['DEBUG'] != ''
-  true  #TODO remove
 end
 
 def exit_with_usage!
@@ -18,20 +17,38 @@ def exit_with_usage!
   exit 1
 end
 
-def create_project_cards(client, organization, project_id, column_id)
+def create_project_card(client, column_id, note)
+  card = client.create_project_card(column_id, note: "TEST CARD, PLEASE IGNORE")
+  puts "Created card [#{card[:url]}], note: \"#{card[:note]}\""
 end
 
-def show_project_columns(client, organization, project_id)
+def create_project_cards(client, column_id, card_notes)
+  card_notes.each do |note|
+    create_project_card(client, column_id, note)
+  end
+end
+
+def show_project_columns(client, project_id)
+  client.project_columns(project_id).each do |column|
+    puts "name:      #{column[:name]}"
+    puts "url:       #{column[:url]}"
+    puts "column_id: #{column[:url].sub(%r{^.*/}, '')}"
+    puts
+  end
 end
 
 def show_organization_projects(client, organization)
   client.org_projects(organization).each do |project|
-    puts "name: #{project[:name]}"
-    puts "body: #{project[:body]}"
-    puts "url: #{project[:url]}"
+    puts "name:       #{project[:name]}"
+    puts "body:       #{project[:body]}"
+    puts "url:        #{project[:url]}"
     puts "project_id: #{project[:url].sub(%r{^.*/}, '')}"
     puts
   end
+end
+
+def get_card_notes
+  []
 end
 
 # retrieve GitHub API token
@@ -49,9 +66,10 @@ column_id    = ARGV.shift
 if organization
   if project_id
     if column_id
-      create_project_cards(client, organization, project_id, column_id)
+      notes = get_card_notes
+      create_project_cards(client, column_id, notes)
     else
-      show_project_columns(client, organization, project_id)
+      show_project_columns(client, project_id)
     end
   else
     show_organization_projects(client, organization)
@@ -59,4 +77,3 @@ if organization
 else
   exit_with_usage!
 end
-
