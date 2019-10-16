@@ -17,18 +17,18 @@ def exit_with_usage!
   exit 1
 end
 
-def create_project_card(client, column_id, note)
-  card = client.create_project_card(column_id, note: "TEST CARD, PLEASE IGNORE")
+def create_project_card(column_id, note)
+  card = client.create_project_card(column_id, note: note)
   puts "Created card [#{card[:url]}], note: \"#{card[:note]}\""
 end
 
-def create_project_cards(client, column_id, card_notes)
+def create_project_cards(column_id, card_notes)
   card_notes.each do |note|
-    create_project_card(client, column_id, note)
+    create_project_card(column_id, note)
   end
 end
 
-def show_project_columns(client, project_id)
+def show_project_columns(project_id)
   client.project_columns(project_id).each do |column|
     puts "name:      #{column[:name]}"
     puts "url:       #{column[:url]}"
@@ -37,7 +37,7 @@ def show_project_columns(client, project_id)
   end
 end
 
-def show_organization_projects(client, organization)
+def show_organization_projects(organization)
   client.org_projects(organization).each do |project|
     puts "name:       #{project[:name]}"
     puts "body:       #{project[:body]}"
@@ -48,15 +48,21 @@ def show_organization_projects(client, organization)
 end
 
 def get_card_notes
-  []
+  STDIN.readlines
+end
+
+def client
+  @client ||= Octokit::Client.new :access_token => access_token
+  puts "Current octokit rate limit: #{@client.rate_limit.inspect}" if debugging?
+  @client
 end
 
 # retrieve GitHub API token
-creds = YAML.load(File.read(File.expand_path('~/.github.yml')))
-access_token = creds["token"]
-
-client = Octokit::Client.new :access_token => access_token
-puts "Current octokit rate limit: #{client.rate_limit.inspect}" if debugging?
+def access_token
+  return @access_token if @access_token
+  creds = YAML.load(File.read(File.expand_path('~/.github.yml')))
+  @access_token = creds["token"]
+end
 
 # gather command-line parameters
 organization = ARGV.shift
@@ -67,12 +73,12 @@ if organization
   if project_id
     if column_id
       notes = get_card_notes
-      create_project_cards(client, column_id, notes)
+      create_project_cards(column_id, notes)
     else
-      show_project_columns(client, project_id)
+      show_project_columns(project_id)
     end
   else
-    show_organization_projects(client, organization)
+    show_organization_projects(organization)
   end
 else
   exit_with_usage!
